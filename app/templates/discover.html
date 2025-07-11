@@ -1,0 +1,29 @@
+<!-- location: app/templates/discover.html -->
+{% extends "base.html" %}
+{% block title %}Entdecken - Projekt Phoenix{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fa-solid fa-compass"></i> Entdecken</h2>
+</div>
+
+<h3>Kürzlich veröffentlichte Projekte</h3>
+<div class="project-list">
+    {% if projects %}
+        {% for project in projects %}
+            <div class="project-card">
+                <h4>{{ project.name }}</h4>
+                <p class="template-info">Erstellt von: {{ project.author | default('Unbekannt') }}</p>
+                <p>Eine kurze Beschreibung des Projekts würde hier stehen...</p>
+                <div class="card-actions">
+                    <a href="#" class="btn btn-primary">Projekt ansehen</a>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="info-box">
+            <p>Aktuell sind keine öffentlichen Projekte verfügbar. Schauen Sie später wieder vorbei!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

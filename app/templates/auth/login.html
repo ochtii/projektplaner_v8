@@ -1,0 +1,49 @@
+<!-- location: app/templates/auth/login.html -->
+{% extends "base.html" %}
+{% block title %}Anmelden{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form">
+        <!-- NEU: Warnhinweis für Test-Modus -->
+        {% if app_settings.get('test_mode') %}
+        <div class="test-mode-warning">
+            <i class="fa-solid fa-flask-vial"></i>
+            <span>Test-Modus ist aktiv</span>
+        </div>
+        {% endif %}
+
+        <h2>Anmelden</h2>
+        <p>Willkommen zurück!</p>
+        <form method="post" action="{{ url_for('auth.login') }}">
+            <!-- NEU: Dropdown für Test-Benutzer -->
+            {% if app_settings.get('test_mode') %}
+            <div class="form-group">
+                <label for="test-user-select">Test-Benutzer auswählen</label>
+                <select id="test-user-select" class="form-control">
+                    <option value="">Benutzer wählen...</option>
+                    <option value="admin">Test-Admin (testadmin@test.at)</option>
+                    <option value="user">Test-Benutzer (testuser@test.at)</option>
+                </select>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="email">E-Mail</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Passwort</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Anmelden</button>
+        </form>
+        <p class="auth-switch">Noch kein Konto? <a href="{{ url_for('auth.register') }}">Jetzt registrieren</a></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- NEU: Zusätzliches Skript für die Login-Hilfe -->
+<script src="{{ url_for('static', filename='js/login_helper.js') }}"></script>
+{% endblock %}

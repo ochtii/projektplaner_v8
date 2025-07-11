@@ -1,0 +1,110 @@
+<!-- location: app/templates/admin/debug_settings.html -->
+{% extends "base.html" %}
+{% block title %}Debug-Einstellungen{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fa-solid fa-sliders"></i> Debug-Einstellungen</h2>
+</div>
+
+<div class="admin-sections">
+    <div class="admin-section">
+        <h3>Live Logging</h3>
+        <p class="form-hint">Steuern Sie die Anzeige von Log-Nachrichten in Echtzeit. Alle Einstellungen hier werden lokal in Ihrem Browser gespeichert.</p>
+
+        <!-- Hauptschalter für das Logging -->
+        <div class="form-group toggle-switch">
+            <label for="logs-enabled-toggle">Live Logs generell aktivieren</label>
+            <label class="switch">
+                <input type="checkbox" class="setting-switch" id="logs-enabled-toggle" data-setting="logs_enabled">
+                <span class="slider round"></span>
+            </label>
+        </div>
+
+        <hr class="setting-divider">
+
+        <!-- Panel, das nur bei aktivem Logging sichtbar ist -->
+        <div id="log-settings-panel" style="display: none;">
+            
+            <div class="admin-subsection">
+                <h4>Anzeige-Optionen</h4>
+                <div class="form-group toggle-switch">
+                    <label for="console-toggle">Eigene Log-Konsole anzeigen</label>
+                    <label class="switch">
+                        <input type="checkbox" class="setting-switch" id="console-toggle" data-setting="show_log_console">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="form-group toggle-switch">
+                    <label for="browser-console-toggle">Logs auch in Browser-Konsole (F12) ausgeben</label>
+                    <label class="switch">
+                        <input type="checkbox" class="setting-switch" id="browser-console-toggle" data-setting="log_to_browser_console">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <!-- NEU: Zusätzliche Anzeige-Einstellungen -->
+                <div class="form-group toggle-switch">
+                    <label for="autoscroll-toggle">Auto-Scroll in Konsole</label>
+                    <label class="switch">
+                        <input type="checkbox" class="setting-switch" id="autoscroll-toggle" data-setting="log_autoscroll_enabled">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="form-group toggle-switch">
+                    <label for="reverse-logs-toggle">Log-Reihenfolge umkehren (neueste oben)</label>
+                    <label class="switch">
+                        <input type="checkbox" class="setting-switch" id="reverse-logs-toggle" data-setting="log_order_reversed">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="admin-subsection">
+                <h4>Log-Typen</h4>
+                <p class="form-hint">Wählen Sie aus, welche Arten von Logs angezeigt werden sollen.</p>
+                <div class="log-filter-grid-page">
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="setting-switch log-filter" id="log-info" data-setting="log_info" checked>
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">Info</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="setting-switch log-filter" id="log-warn" data-setting="log_warn" checked>
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">Warnungen</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="setting-switch log-filter" id="log-err" data-setting="log_err" checked>
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">Fehler</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="setting-switch log-filter" id="log-api-req" data-setting="log_api_req" checked>
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">API Anfragen</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="setting-switch log-filter" id="log-api-ans" data-setting="log_api_ans" checked>
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">API Antworten</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="setting-switch log-filter" id="log-firebase" data-setting="log_firebase" checked>
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">Firebase</span>
+                    </label>
+                    <label class="custom-checkbox">
+                        <input type="checkbox" class="setting-switch log-filter" id="log-activity" data-setting="log_activity" checked>
+                        <span class="checkbox-box"></span>
+                        <span class="checkbox-label">Aktivitäten</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_settings.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,128 @@
+<!-- location: app/templates/project_checklist.html -->
+{% extends "base.html" %}
+{% block title %}{{ project.name }} - Checkliste{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fa-solid fa-list-check"></i> Checkliste: {{ project.name }}</h2>
+    <div class="checklist-controls">
+        <label class="switch-label" for="comment-toggle">Kommentare anzeigen</label>
+        <label class="switch">
+            <input type="checkbox" id="comment-toggle">
+            <span class="slider round"></span>
+        </label>
+    </div>
+</div>
+
+<div class="progress-section">
+    <h4>Gesamtfortschritt</h4>
+    <div class="progress-bar-container large">
+        <div class="progress-bar" style="width: 0%;" id="total-progress-bar"></div>
+        <span id="total-progress-text">0%</span>
+    </div>
+    <button class="btn btn-secondary btn-sm" id="info-button">
+        <i class="fa-solid fa-circle-info"></i> Phasen-Details
+    </button>
+</div>
+
+<div class="checklist-container">
+    {% for phase in project.structure %}
+    <div class="phase-group">
+        <h3 class="phase-title">{{ phase.name }}</h3>
+        {% for task in phase.children %}
+        <div class="task-group">
+            <h4 class="task-title">{{ task.name }}</h4>
+            <ul class="subtask-list">
+                {% for subtask in task.children %}
+                <li>
+                    <input type="checkbox" id="{{ subtask.id }}" data-parent-task="{{ task.id }}" data-parent-phase="{{ phase.id }}" {% if subtask.completed %}checked{% endif %}>
+                    <label for="{{ subtask.id }}">{{ subtask.name }}</label>
+                    {% if subtask.comment %}
+                    <p class="comment-preview" style="display:none;"><em>Kommentar: {{ subtask.comment }}</em></p>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal für Phasen-Details -->
+<div id="phaseInfoModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="document.getElementById('phaseInfoModal').style.display='none'">&times;</span>
+        <h3>Status der Phasen</h3>
+        <div id="phase-status-details">
+            <!-- Details werden per JS eingefügt -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const commentToggle = document.getElementById('comment-toggle');
+    const commentPreviews = document.querySelectorAll('.comment-preview');
+    const checkboxes = document.querySelectorAll('.subtask-list input[type="checkbox"]');
+    const totalProgressBar = document.getElementById('total-progress-bar');
+    const totalProgressText = document.getElementById('total-progress-text');
+    const infoButton = document.getElementById('info-button');
+    const phaseInfoModal = document.getElementById('phaseInfoModal');
+    const phaseStatusDetails = document.getElementById('phase-status-details');
+
+    commentToggle.addEventListener('change', function() {
+        commentPreviews.forEach(p => {
+            p.style.display = this.checked ? 'block' : 'none';
+        });
+    });
+
+    function updateProgress() {
+        const totalTasks = checkboxes.length;
+        if (totalTasks === 0) return;
+
+        const completedTasks = document.querySelectorAll('.subtask-list input[type="checkbox"]:checked').length;
+        const percentage = (completedTasks / totalTasks) * 100;
+        
+        totalProgressBar.style.width = percentage + '%';
+        totalProgressText.textContent = Math.round(percentage) + '%';
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateProgress);
+    });
+    
+    infoButton.addEventListener('click', function() {
+        let detailsHtml = '<ul>';
+        const phases = {};
+
+        checkboxes.forEach(cb => {
+            const phaseId = cb.dataset.parentPhase;
+            if (!phases[phaseId]) {
+                const phaseTitle = document.querySelector(`[data-id="${phaseId}"] .item-name`)?.textContent || 'Unbenannte Phase';
+                phases[phaseId] = { total: 0, completed: 0, name: phaseTitle };
+            }
+            phases[phaseId].total++;
+            if (cb.checked) {
+                phases[phaseId].completed++;
+            }
+        });
+
+        for (const phaseId in phases) {
+            const phase = phases[phaseId];
+            const percentage = phase.total > 0 ? (phase.completed / phase.total) * 100 : 0;
+            detailsHtml += `<li><strong>${phase.name}:</strong> ${Math.round(percentage)}% abgeschlossen (${phase.completed}/${phase.total})</li>`;
+        }
+
+        detailsHtml += '</ul>';
+        phaseStatusDetails.innerHTML = detailsHtml;
+        phaseInfoModal.style.display = 'block';
+    });
+
+    // Initial progress calculation
+    updateProgress();
+});
+</script>
+{% endblock %}

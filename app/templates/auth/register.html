@@ -1,0 +1,39 @@
+<!-- location: app/templates/auth/register.html -->
+{% extends "base.html" %}
+{% block title %}Registrieren{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form">
+        <h2>Neues Konto erstellen</h2>
+        <p>Starten Sie noch heute mit Projekt Phoenix.</p>
+        <form method="post" action="{{ url_for('auth.register') }}" id="register-form">
+            <p class="form-hint"><span class="required-star">*</span> Pflichtfelder</p>
+            <div class="form-group">
+                <label for="username">Benutzername <span class="required-star">*</span></label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-Mail <span class="required-star">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Passwort <span class="required-star">*</span></label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="password-confirm">Passwort wiederholen <span class="required-star">*</span></label>
+                <input type="password" id="password-confirm" name="password_confirm" required>
+                <small id="password-error" class="password-validation-error"></small>
+            </div>
+            <button type="submit" id="register-button" class="btn btn-primary btn-block">Registrieren</button>
+        </form>
+        <p class="auth-switch">Bereits ein Konto? <a href="{{ url_for('auth.login') }}">Hier anmelden</a></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Verweis auf die externe JavaScript-Datei -->
+<script src="{{ url_for('static', filename='js/auth_validation.js') }}"></script>
+{% endblock %}

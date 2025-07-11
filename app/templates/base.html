@@ -1,0 +1,116 @@
+<!-- location: app/templates/base.html -->
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Projekt Phoenix{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">
+            <a href="{{ url_for('projects.dashboard') }}" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-feather-pointed"></i>
+                <h1>Projekt Phoenix</h1>
+            </a>
+        </div>
+        <nav>
+            {% if session.user_id %}
+            <a href="{{ url_for('projects.dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('main.discover') }}">Entdecken</a>
+            <a href="#">Freunde</a>
+            {% if session.is_admin %}
+            <a href="{{ url_for('admin.index') }}">Admin</a>
+            {% endif %}
+            {% endif %}
+        </nav>
+        <div class="user-menu">
+            <div class="theme-switcher">
+                <i class="fas fa-sun theme-icon"></i>
+                <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
+                <label for="theme-toggle" class="theme-toggle-label"></label>
+                <i class="fas fa-moon theme-icon"></i>
+            </div>
+            {% if session.user_id %}
+                <span>Willkommen, {{ session.username }}! {% if session.is_admin %}<strong class="admin-label">(Admin)</strong>{% endif %}</span>
+                <a href="{{ url_for('auth.logout') }}" class="logout-btn" title="Abmelden"><i class="fa-solid fa-right-from-bracket"></i></a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-secondary">Anmelden</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Registrieren</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- NEU: Sicherheits-Hinweis-Bereich -->
+    <div class="security-notice-container">
+        {% if session.is_admin and app_settings.get('debug_mode') %}
+        <div class="security-notice debug-notice">
+            <i class="fa-solid fa-bug"></i>
+            <span>Debug-Modus aktiv</span>
+        </div>
+        {% endif %}
+        {% if app_settings.get('test_mode') %}
+        <div class="security-notice test-notice">
+            <i class="fa-solid fa-flask-vial"></i>
+            <span>Test-Modus aktiv</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Überarbeitete Log-Konsole -->
+    <div id="log-console" class="log-console" style="display: none;">
+        <div class="log-header">
+            <span class="log-header-title">Live Log</span>
+            <div class="log-header-actions">
+                <button id="log-autoscroll-btn" class="icon-btn" title="Auto-Scroll"><i class="fas fa-arrow-down"></i></button>
+                <button id="log-reverse-btn" class="icon-btn" title="Reihenfolge umkehren"><i class="fas fa-exchange-alt"></i></button>
+                <button id="log-settings-btn" class="icon-btn" title="Filter"><i class="fas fa-filter"></i></button>
+                <button id="log-clear-btn" class="icon-btn" title="Logs löschen"><i class="fas fa-trash-alt"></i></button>
+                <button id="log-close-btn" class="icon-btn" title="Schließen">&times;</button>
+            </div>
+        </div>
+        <div class="log-content"></div>
+        <!-- Einstellungs-Popup für die Konsole -->
+        <div id="log-settings-popup" class="log-settings-popup">
+            <div class="popup-header">
+                <h4>Log-Filter</h4>
+                <button id="popup-close-btn" class="icon-btn">&times;</button>
+            </div>
+            <div class="log-filter-grid">
+                <!-- Filter werden hier per JS eingefügt -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Generisches Bestätigungs-Modal -->
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content small">
+            <h3 id="confirm-modal-title">Bestätigung</h3>
+            <p id="confirm-modal-text">Möchten Sie fortfahren?</p>
+            <div class="modal-actions">
+                <button id="confirm-modal-no" class="btn btn-secondary">Abbrechen</button>
+                <button id="confirm-modal-yes" class="btn btn-danger">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/debug_console.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

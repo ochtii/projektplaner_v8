@@ -1,0 +1,50 @@
+[
+    {
+        "id": "08038697-798b-4c3e-a051-3e1869ae7ac4",
+        "name": "Beispiel: Softwareentwicklung",
+        "template": "Softwareentwicklung",
+        "created_at": "2025-07-11T15:13:58.264536",
+        "structure": [
+            {
+                "id": "504ed713-600c-401c-a8cb-9fccabed3d5e",
+                "type": "phase",
+                "name": "1. Konzeption & Planung",
+                "children": [
+                    {
+                        "id": "5cf4d3f7-17c2-45eb-8eb0-8859cfb446c4",
+                        "type": "task",
+                        "name": "1.1. Anforderungen definieren",
+                        "children": [
+                            {
+                                "id": "be7e1182-8ed3-4d96-b547-55792941c9ff",
+                                "type": "subtask",
+                                "name": "1.1.1. Stakeholder-Interviews",
+                                "completed": true,
+                                "comment": "Alle wichtigen Stakeholder wurden befragt."
+                            },
+                            {
+                                "id": "5e673946-a0f3-4d55-963f-46b38780a921",
+                                "type": "subtask",
+                                "name": "1.1.2. User Stories schreiben",
+                                "completed": false,
+                                "comment": ""
+                            }
+                        ]
+                    },
+                    {
+                        "id": "5a5f6d01-998b-4212-9714-58fdcf54125a",
+                        "type": "task",
+                        "name": "1.2. Technisches Design",
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "dc44e7a9-f4dc-4ac9-be3b-b268650b7b0b",
+                "type": "phase",
+                "name": "2. Entwicklung",
+                "children": []
+            }
+        ]
+    }
+]

@@ -1,0 +1,57 @@
+<!-- location: app/templates/admin.html -->
+{% extends "base.html" %}
+{% block title %}Admin-Bereich{% endblock %}
+
+{% block content %}
+<!-- Platzhalter für die dynamische Benachrichtigung -->
+<div id="auto-save-notification" class="auto-save-notification"></div>
+
+<div class="page-header">
+    <h2><i class="fa-solid fa-user-shield"></i> Admin-Bereich</h2>
+</div>
+
+<div class="admin-sections">
+    <!-- Benutzerverwaltung -->
+    <div class="admin-section">
+        <h3>Benutzerverwaltung</h3>
+        <table>
+            <!-- Inhalt der Benutzerverwaltung -->
+        </table>
+    </div>
+
+    <!-- Anwendungseinstellungen -->
+    <div class="admin-section">
+        <h3>Globale Einstellungen</h3>
+        
+        <!-- NEU: Gruppierter Schalter mit Button -->
+        <div class="setting-group-horizontal">
+            <div class="form-group toggle-switch">
+                <label for="debug-mode-toggle">Debug-Modus</label>
+                <label class="switch">
+                    <input type="checkbox" class="setting-switch" id="debug-mode-toggle" data-setting="debug_mode" {% if app_settings.get('debug_mode') %}checked{% endif %}>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <a href="{{ url_for('admin.debug_settings') }}" id="debug-settings-btn" class="btn btn-debug" style="display: {% if app_settings.get('debug_mode') %}inline-flex{% else %}none{% endif %};">
+                <i class="fa-solid fa-sliders"></i> Debug-Einstellungen
+            </a>
+        </div>
+        <p class="form-hint">Aktiviert detaillierte Server-Logs und das Debug-Icon. Erfordert einen Neustart der Anwendung.</p>
+
+        <hr class="setting-divider">
+
+        <div class="form-group toggle-switch">
+            <label for="test-mode-toggle">Test-Modus</label>
+            <label class="switch">
+                <input type="checkbox" class="setting-switch" id="test-mode-toggle" data-setting="test_mode" {% if app_settings.get('test_mode') %}checked{% endif %}>
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <p class="form-hint">Aktiviert eine Login-Hilfe mit Test-Benutzern auf der Anmeldeseite.</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin_settings.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,109 @@
+<!-- location: app/templates/project_overview.html -->
+{% extends "base.html" %}
+{% block title %}{{ project.name }} - Übersicht{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2><i class="fa-solid fa-magnifying-glass"></i> Übersicht: {{ project.name }}</h2>
+    <div class="view-switcher">
+        <label for="diagram-type">Ansicht:</label>
+        <select id="diagram-type" name="diagram-type">
+            <option value="text">Textansicht</option>
+            <option value="chart">Diagramm (Gantt)</option>
+            <option value="mindmap">Mindmap</option>
+        </select>
+    </div>
+</div>
+
+<div class="overview-container">
+    <!-- Textansicht -->
+    <div id="text-view" class="view-content active">
+        <h3>Projektstruktur (Text)</h3>
+        <ul class="overview-list">
+            {% for phase in project.structure %}
+            <li>
+                <strong>{{ phase.name }}</strong>
+                <ul>
+                    {% for task in phase.children %}
+                    <li>
+                        {{ task.name }}
+                        <ul>
+                            {% for subtask in task.children %}
+                            <li>
+                                {{ subtask.name }}
+                                {% if subtask.comment %}
+                                <span class="comment-icon" title="{{ subtask.comment }}">💬</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Grafische Ansicht (Platzhalter) -->
+    <div id="chart-view" class="view-content" style="display: none;">
+        <h3>Grafische Darstellung</h3>
+        <div class="chart-placeholder">
+            <p>Hier wird das ausgewählte Diagramm (z.B. ein Gantt-Chart) angezeigt.</p>
+            <p>Dies erfordert eine JavaScript-Bibliothek wie D3.js, Chart.js oder Mermaid.</p>
+            <i class="fa-solid fa-chart-pie" style="font-size: 5rem; color: #ccc;"></i>
+        </div>
+    </div>
+</div>
+
+<style>
+    .overview-list {
+        list-style-type: none;
+        padding-left: 0;
+        line-height: 1.8;
+    }
+    .overview-list ul {
+        padding-left: 30px;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+    .overview-list li {
+        padding: 2px 0;
+    }
+    .comment-icon {
+        cursor: help;
+        font-size: 0.9em;
+        margin-left: 8px;
+    }
+    .chart-placeholder {
+        border: 2px dashed var(--border-color);
+        padding: 40px;
+        text-align: center;
+        color: #888;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('diagram-type');
+    const textView = document.getElementById('text-view');
+    const chartView = document.getElementById('chart-view');
+
+    select.addEventListener('change', function() {
+        // In einer echten App würde man hier je nach Auswahl die Ansicht wechseln
+        if (this.value === 'text') {
+            textView.style.display = 'block';
+            chartView.style.display = 'none';
+        } else {
+            textView.style.display = 'none';
+            chartView.style.display = 'block';
+        }
+    });
+});
+</script>
+{% endblock %}
