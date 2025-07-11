@@ -21,6 +21,10 @@ class DataManager:
         """NEU: Speichert Einstellungen für einen bestimmten Benutzer."""
         return self._service.save_user_settings(user_id, settings)
 
+    def get_user_settings(self, user_id):
+        """NEU: Lädt Einstellungen für einen bestimmten Benutzer."""
+        return self._service.get_user_settings(user_id)
+
     def get_all_users(self): return self._service.get_all_users()
     def get_all_projects(self): return self._service.get_all_projects()
     def get_project(self, project_id): return self._service.get_project(project_id)

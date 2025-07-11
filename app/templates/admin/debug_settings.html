@@ -100,6 +100,161 @@
                     </label>
                 </div>
             </div>
+            
+            <!-- Farbeinstellungen Sektion -->
+            <div class="admin-subsection">
+                <h4>Log-Einstellungen</h4>
+                <p class="form-hint">
+                    Passen Sie die Farben für verschiedene Log-Typen und die Konsole an. 
+                    <strong>Live-Update:</strong> Änderungen werden sofort angezeigt während Sie die Farbe auswählen.
+                    <br><small><i class="fa-solid fa-keyboard"></i> Tipp: Drücken Sie <kbd>ESC</kbd> um Änderungen rückgängig zu machen.</small>
+                </p>
+                
+                <!-- Konsolen-Styling Bereich -->
+                <h5>Konsolen Styling</h5>
+                <div class="log-color-settings console-styling">
+                    <div class="color-setting console-background">
+                        <label for="color-console-bg">Konsolen-Hintergrund:</label>
+                        <input type="color" id="color-console-bg" data-log-type="console_background" value="#282c34" class="color-picker">
+                        <div class="console-preview" data-type="console_background">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[CONSOLE]</span>
+                            <span class="preview-message">Konsolen-Hintergrund</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-log-text">Log-Text:</label>
+                        <input type="color" id="color-log-text" data-log-type="log_text" value="#abb2bf" class="color-picker">
+                        <div class="console-preview" data-type="log_text">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[TEXT]</span>
+                            <span class="preview-message">Beispiel Log-Text</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-timestamp">Zeitstempel:</label>
+                        <input type="color" id="color-timestamp" data-log-type="timestamp" value="#8892b0" class="color-picker">
+                        <div class="console-preview" data-type="timestamp">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[TIME]</span>
+                            <span class="preview-message">Zeitstempel-Farbe</span>
+                        </div>
+                    </div>
+                    <div class="color-setting header-background">
+                        <label for="color-header">Header-Hintergrund:</label>
+                        <input type="color" id="color-header" data-log-type="header_bg" value="#1e2127" class="color-picker">
+                        <div class="console-preview header-preview" data-type="header_bg">
+                            <span class="preview-header">Log-Konsole Header</span>
+                        </div>
+                    </div>
+                    <div class="color-setting header-text">
+                        <label for="color-header-text">Header-Schrift:</label>
+                        <input type="color" id="color-header-text" data-log-type="header_text" value="#ffffff" class="color-picker">
+                        <div class="console-preview header-preview" data-type="header_text">
+                            <span class="preview-header">Header-Text</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5>Log-Typ Farben</h5>
+                <div class="log-color-settings">
+                    <div class="color-setting">
+                        <label for="color-info">Info:</label>
+                        <input type="color" id="color-info" data-log-type="info" value="#3b82f6" class="color-picker">
+                        <div class="console-preview" data-type="info">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[INFO]</span>
+                            <span class="preview-message">Beispiel Info-Log</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-warn">Warnungen:</label>
+                        <input type="color" id="color-warn" data-log-type="warn" value="#f59e0b" class="color-picker">
+                        <div class="console-preview" data-type="warn">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[WARN]</span>
+                            <span class="preview-message">Beispiel Warnung</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-err">Fehler:</label>
+                        <input type="color" id="color-err" data-log-type="err" value="#ef4444" class="color-picker">
+                        <div class="console-preview" data-type="err">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[ERR]</span>
+                            <span class="preview-message">Beispiel Fehler</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-api-req">API Anfragen:</label>
+                        <input type="color" id="color-api-req" data-log-type="api_req" value="#8b5cf6" class="color-picker">
+                        <div class="console-preview" data-type="api_req">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[API-REQ]</span>
+                            <span class="preview-message">Beispiel API Request</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-api-ans">API Antworten:</label>
+                        <input type="color" id="color-api-ans" data-log-type="api_ans" value="#a855f7" class="color-picker">
+                        <div class="console-preview" data-type="api_ans">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[API-ANS]</span>
+                            <span class="preview-message">Beispiel API Response</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-database">Datenbank:</label>
+                        <input type="color" id="color-database" data-log-type="database" value="#10b981" class="color-picker">
+                        <div class="console-preview" data-type="database">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[DB]</span>
+                            <span class="preview-message">Beispiel Datenbank-Log</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-firestore">Firestore:</label>
+                        <input type="color" id="color-firestore" data-log-type="firestore" value="#059669" class="color-picker">
+                        <div class="console-preview" data-type="firestore">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[FIRESTORE]</span>
+                            <span class="preview-message">Beispiel Firestore-Log</span>
+                        </div>
+                    </div>
+                    <div class="color-setting">
+                        <label for="color-activity">Aktivitäten:</label>
+                        <input type="color" id="color-activity" data-log-type="activity" value="#6b7280" class="color-picker">
+                        <div class="console-preview" data-type="activity">
+                            <span class="preview-time">[12:34:56]</span>
+                            <span class="preview-type">[ACTIVITY]</span>
+                            <span class="preview-message">Beispiel Aktivitäts-Log</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reset-Button für alle Farben -->
+                <div class="color-controls">
+                    <button type="button" id="reset-colors" class="btn btn-warning">
+                        <i class="fa-solid fa-undo"></i> Alle Farben zurücksetzen
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reset Confirmation Modal -->
+<div id="reset-confirm-modal" class="reset-confirm-modal">
+    <div class="reset-confirm-content">
+        <h4><i class="fa-solid fa-triangle-exclamation"></i> Farbe zurücksetzen</h4>
+        <p id="reset-confirm-text">Möchten Sie diese Farbe wirklich auf den Standardwert zurücksetzen?</p>
+        <div class="reset-confirm-buttons">
+            <button type="button" id="reset-confirm-yes" class="btn btn-warning">
+                <i class="fa-solid fa-check"></i> Ja, zurücksetzen
+            </button>
+            <button type="button" id="reset-confirm-no" class="btn btn-secondary">
+                <i class="fa-solid fa-times"></i> Abbrechen
+            </button>
         </div>
     </div>
 </div>

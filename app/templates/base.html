@@ -75,7 +75,17 @@
     <!-- Überarbeitete Log-Konsole -->
     <div id="log-console" class="log-console" style="display: none;">
         <div class="log-header">
-            <span class="log-header-title">Live Log</span>
+            <div class="log-header-left">
+                <span class="log-header-title">Live Log</span>
+                <div class="log-header-warnings">
+                    <span id="test-mode-warning" class="mode-warning test-mode" style="display: none;">
+                        <i class="fas fa-flask"></i> TEST MODE
+                    </span>
+                    <span id="debug-mode-warning" class="mode-warning debug-mode" style="display: none;">
+                        <i class="fas fa-bug"></i> DEBUG MODE
+                    </span>
+                </div>
+            </div>
             <div class="log-header-actions">
                 <button id="log-autoscroll-btn" class="icon-btn" title="Auto-Scroll"><i class="fas fa-arrow-down"></i></button>
                 <button id="log-reverse-btn" class="icon-btn" title="Reihenfolge umkehren"><i class="fas fa-exchange-alt"></i></button>
@@ -109,6 +119,13 @@
         </div>
     </div>
 
+    <script>
+        // App-Modi für JavaScript verfügbar machen
+        window.APP_MODES = {
+            debug_mode: {{ 'true' if app_settings.get('debug_mode') else 'false' }},
+            test_mode: {{ 'true' if app_settings.get('test_mode') else 'false' }}
+        };
+    </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/debug_console.js') }}"></script>
     {% block scripts %}{% endblock %}

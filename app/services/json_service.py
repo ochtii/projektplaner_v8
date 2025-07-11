@@ -60,3 +60,48 @@ class JsonService:
         users[user_data.get('id')] = user_data
         self._write_data(self.users_file, users)
         return user_data
+    
+    def save_user_settings(self, user_id, settings):
+        """NEU: Speichert ein Einstellungs-Dictionary für einen Benutzer (JSON-Version)."""
+        users = self._read_data(self.users_file)
+        if user_id in users:
+            users[user_id]['settings'] = settings
+            self._write_data(self.users_file, users)
+            return True
+        return False
+
+    def get_user_settings(self, user_id):
+        """NEU: Lädt Einstellungen für einen bestimmten Benutzer (JSON-Version)."""
+        users = self._read_data(self.users_file)
+        if user_id in users:
+            return users[user_id].get('settings', {})
+        return {}
+
+    def save_user_log_colors(self, user_id, log_colors):
+        """Spezialisierte Methode für Log-Farbeinstellungen (JSON-Version)."""
+        # Organisiere die Daten ähnlich wie in Firestore für Konsistenz
+        from datetime import datetime
+        timestamp = datetime.utcnow().isoformat() + 'Z'
+        
+        organized_colors = {
+            'preferences': {
+                'ui': {
+                    'log_colors': log_colors,
+                    'updated_at': timestamp,
+                    'version': '1.0'
+                }
+            }
+        }
+        
+        return self.save_user_settings(user_id, organized_colors)
+
+    def get_user_log_colors(self, user_id):
+        """Spezialisierte Methode zum Laden von Log-Farbeinstellungen (JSON-Version)."""
+        settings = self.get_user_settings(user_id)
+        
+        # Versuche organisierte Struktur zuerst
+        if 'preferences' in settings and 'ui' in settings['preferences']:
+            return settings['preferences']['ui'].get('log_colors', {})
+        
+        # Fallback für alte/flache Struktur
+        return settings.get('log_colors', {})

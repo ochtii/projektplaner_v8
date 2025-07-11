@@ -66,6 +66,72 @@ def update_user_log_settings():
     session.modified = True
     return jsonify({'status': 'success', 'message': 'Log-Einstellungen gespeichert.'})
 
+# NEU: API-Route zum Speichern von benutzerdefinierten Einstellungen (inkl. Farben)
+@admin_bp.route('/api/save-user-settings', methods=['POST'])
+@admin_required  
+def save_user_settings():
+    data = request.get_json()
+    if not data:
+        return jsonify({'status': 'error', 'message': 'Keine Daten erhalten'}), 400
+    
+    user_id = session.get('user_id')
+    category = data.get('category', 'general')
+    settings = data.get('settings', {})
+    
+    try:
+        # Spezielle Behandlung für Log-Farben mit verbesserter Firebase-Struktur
+        if category == 'log_colors' and hasattr(data_manager._service, 'save_user_log_colors'):
+            # Nutze die spezialisierte Methode für bessere Datenbankstruktur
+            result = data_manager._service.save_user_log_colors(user_id, settings)
+        else:
+            # Aktuelle Benutzereinstellungen laden
+            user_data = data_manager.get_user(user_id) or {}
+            current_settings = user_data.get('settings', {})
+            
+            # Einstellungen für die Kategorie aktualisieren
+            current_settings[category] = settings
+            
+            # Zurück speichern
+            result = data_manager.save_user_settings(user_id, current_settings)
+        
+        return jsonify({
+            'status': 'success', 
+            'message': f'Einstellungen für Kategorie "{category}" gespeichert.',
+            'firebase_structure': 'optimized' if category == 'log_colors' else 'standard'
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+# NEU: API-Route zum Laden von benutzerdefinierten Einstellungen
+@admin_bp.route('/api/get-user-settings', methods=['GET'])
+@admin_required
+def get_user_settings():
+    user_id = session.get('user_id')
+    category = request.args.get('category', 'general')
+    
+    try:
+        # Spezielle Behandlung für Log-Farben
+        if category == 'log_colors' and hasattr(data_manager._service, 'get_user_log_colors'):
+            # Nutze die spezialisierte Methode für optimierte Abfrage
+            settings = data_manager._service.get_user_log_colors(user_id)
+            return jsonify({
+                'status': 'success',
+                'settings': settings,
+                'firebase_structure': 'optimized'
+            })
+        else:
+            # Standard-Verhalten für andere Kategorien
+            user_data = data_manager.get_user(user_id) or {}
+            settings = user_data.get('settings', {}).get(category, {})
+            
+            return jsonify({
+                'status': 'success',
+                'settings': settings,
+                'firebase_structure': 'standard'
+            })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 
 @admin_bp.route('/set-admin-status', methods=['POST'])
 @admin_required
