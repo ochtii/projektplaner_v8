@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set toggle position based on current theme
     if (themeToggle) {
         themeToggle.checked = currentTheme === 'light';
+        console.log(`Theme: ${currentTheme}, Toggle checked: ${themeToggle.checked}`);
     }
     
     // Theme toggle event listener
@@ -54,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyTheme(theme) {
         body.classList.remove('theme-dark', 'theme-light');
         body.classList.add(`theme-${theme}`);
+        
+        console.log(`Applied theme: ${theme}, Body classes:`, body.className);
         
         // Theme is now controlled by CSS variables defined in style.css
         // No need to manually set CSS properties here

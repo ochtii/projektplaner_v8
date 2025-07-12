@@ -80,8 +80,33 @@ body {
 .theme-icon {
     color: var(--text-color);
     font-size: 16px;
-    opacity: 0.7;
-    transition: opacity 0.3s ease;
+    opacity: 0.4;
+    transition: opacity 0.3s ease, color 0.3s ease;
+}
+
+/* Default state - show both icons dimmed */
+.theme-switcher .theme-icon {
+    opacity: 0.4;
+}
+
+/* Light mode - highlight sun (last icon) */
+.theme-light .theme-icon:last-child {
+    opacity: 1;
+    color: #f39c12;
+}
+
+.theme-light .theme-icon:first-child {
+    opacity: 0.4;
+}
+
+/* Dark mode - highlight moon (first icon) */
+.theme-dark .theme-icon:first-child {
+    opacity: 1;
+    color: #74c0fc;
+}
+
+.theme-dark .theme-icon:last-child {
+    opacity: 0.4;
 }
 
 .theme-toggle-checkbox {
@@ -117,17 +142,6 @@ body {
 .theme-toggle-checkbox:checked + .theme-toggle-label::after {
     transform: translateX(26px);
     background: white;
-}
-
-/* Theme-specific adjustments - Icons are swapped: moon first, sun last */
-.theme-light .theme-icon:last-child {
-    opacity: 1;
-    color: #f39c12;
-}
-
-.theme-dark .theme-icon:first-child {
-    opacity: 1;
-    color: #74c0fc;
 }
 
 /* Sicherheits-Hinweise */
@@ -177,10 +191,6 @@ main.container { max-width: 1200px; margin: 20px auto; padding: 0 20px 20px 20px
 .theme-toggle-label::after { content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%; background-color: #fff; top: 4px; left: 4px; transition: transform 0.2s ease-in-out; }
 .theme-toggle-checkbox:checked + .theme-toggle-label { background-color: #334155; }
 .theme-toggle-checkbox:checked + .theme-toggle-label::after { transform: translateX(24px); }
-body:not(.dark-mode) .theme-switcher .fa-sun { color: #f39c12; }
-body:not(.dark-mode) .theme-switcher .fa-moon { color: var(--text-color-light); }
-body.dark-mode .theme-switcher .fa-moon { color: #f1c40f; }
-body.dark-mode .theme-switcher .fa-sun { color: var(--text-color-light); }
 .auth-container { display: flex; justify-content: center; align-items: center; padding: 50px 20px; }
 .auth-form { background: var(--card-bg); padding: 40px; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
 .auth-form h2 { text-align: center; margin-top: 0; margin-bottom: 10px; color: var(--text-color); }
