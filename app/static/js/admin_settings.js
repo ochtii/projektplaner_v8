@@ -18,6 +18,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetColorsBtn = document.getElementById('reset-colors');
     const colorPreviews = document.querySelectorAll('.color-preview');
 
+    // Change Detection System
+    let currentSettings = {
+        colors: {},
+        logFilters: {},
+        adminSettings: {}
+    };
+
+    // Deep comparison function
+    function deepEqual(obj1, obj2) {
+        if (obj1 === obj2) return true;
+        if (obj1 == null || obj2 == null) return false;
+        if (typeof obj1 !== 'object' || typeof obj2 !== 'object') return false;
+        
+        const keys1 = Object.keys(obj1);
+        const keys2 = Object.keys(obj2);
+        
+        if (keys1.length !== keys2.length) return false;
+        
+        for (let key of keys1) {
+            if (!keys2.includes(key)) return false;
+            if (!deepEqual(obj1[key], obj2[key])) return false;
+        }
+        
+        return true;
+    }
+
+    // Only save if settings actually changed
+    const saveIfChanged = async (category, newSettings, saveFunction) => {
+        const currentCategorySettings = currentSettings[category];
+        
+        if (!deepEqual(currentCategorySettings, newSettings)) {
+            window.log?.('info', `${category} Einstellungen haben sich geändert - speichere...`);
+            currentSettings[category] = { ...newSettings };
+            return await saveFunction(newSettings);
+        } else {
+            window.log?.('info', `${category} Einstellungen unverändert - überspringe Speicherung`);
+            return true;
+        }
+    };
+
     // Standard-Farbwerte definieren
     const defaultColors = {
         console_background: '#282c34',
@@ -31,11 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         api_req: '#8b5cf6',
         api_ans: '#a855f7',
         database: '#10b981',
-        firestore: '#059669',
         activity: '#6b7280'
     };
 
-    // Firestore-Funktionen
+    // Firestore-Funktionen für Farbeinstellungen
     const saveToFirestore = async (colorSettings) => {
         try {
             const response = await fetch('/admin/api/save-user-settings', {
@@ -75,6 +114,87 @@ document.addEventListener('DOMContentLoaded', () => {
             window.log?.('warn', `Firestore-Laden fehlgeschlagen: ${error.message}`);
         }
         return null;
+    };
+
+    // Firestore-Funktionen für Log-Filter-Einstellungen
+    const saveLogFiltersToFirestore = async (filterSettings) => {
+        try {
+            const response = await fetch('/admin/api/save-user-settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    category: 'log_filters',
+                    settings: filterSettings
+                })
+            });
+            
+            if (response.ok) {
+                window.log?.('info', 'Log-Filter-Einstellungen in Firestore gespeichert');
+                return true;
+            } else {
+                throw new Error('Fehler beim Speichern der Log-Filter in Firestore');
+            }
+        } catch (error) {
+            window.log?.('err', `Firestore-Speicherung der Log-Filter fehlgeschlagen: ${error.message}`);
+            return false;
+        }
+    };
+
+    const loadLogFiltersFromFirestore = async () => {
+        try {
+            const response = await fetch('/admin/api/get-user-settings?category=log_filters');
+            if (response.ok) {
+                const data = await response.json();
+                if (data.settings) {
+                    window.log?.('info', 'Log-Filter-Einstellungen aus Firestore geladen');
+                    return data.settings;
+                }
+            }
+        } catch (error) {
+            window.log?.('warn', `Firestore-Laden der Log-Filter fehlgeschlagen: ${error.message}`);
+        }
+        return null;
+    };
+
+    // Hilfsfunktionen für Log-Filter-Einstellungen
+    const collectLogFilterSettings = () => {
+        const filterSettings = {};
+        const logFilters = document.querySelectorAll('.log-filter');
+        
+        logFilters.forEach(filter => {
+            const settingKey = filter.dataset.setting;
+            filterSettings[settingKey] = filter.checked;
+        });
+        
+        // Auch andere log-bezogene Einstellungen einschließen
+        const additionalLogSettings = [
+            'show_log_console',
+            'log_to_browser_console', 
+            'log_autoscroll_enabled',
+            'log_order_reversed',
+            'logs_enabled'
+        ];
+        
+        additionalLogSettings.forEach(setting => {
+            const element = document.querySelector(`[data-setting="${setting}"]`);
+            if (element) {
+                filterSettings[setting] = element.checked;
+            }
+        });
+        
+        return filterSettings;
+    };
+
+    const applyLogFilterSettings = (filterSettings) => {
+        Object.entries(filterSettings).forEach(([settingKey, value]) => {
+            const element = document.querySelector(`[data-setting="${settingKey}"]`);
+            if (element) {
+                element.checked = value;
+                localStorage.setItem(settingKey, value);
+            }
+        });
     };
 
     // Hilfsfunktionen für Farbeinstellungen
@@ -214,17 +334,18 @@ document.addEventListener('DOMContentLoaded', () => {
             updateColorPreview(logType, color);
             updateLogStyles(logType, color);
             
-            // Verzögertes Speichern
+            // Verzögertes Speichern mit Change Detection
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
                 localStorage.setItem(`log_color_${logType}`, color);
                 
-                const currentColors = {};
+                const newColors = {};
                 Object.keys(defaultColors).forEach(type => {
-                    currentColors[type] = localStorage.getItem(`log_color_${type}`) || defaultColors[type];
+                    newColors[type] = localStorage.getItem(`log_color_${type}`) || defaultColors[type];
                 });
                 
-                await saveToFirestore(currentColors);
+                // Nur speichern wenn sich Farben geändert haben
+                await saveIfChanged('colors', newColors, saveToFirestore);
             }, 1000);
         });
     });
@@ -233,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (resetColorsBtn) {
         resetColorsBtn.addEventListener('click', () => {
             resetConfirmText.textContent = 'Möchten Sie wirklich alle Farben auf die Standardwerte zurücksetzen?';
-            resetConfirmModal.style.display = 'block';
+            resetConfirmModal.style.display = 'flex';
             
             resetConfirmYes.onclick = async () => {
                 await resetAllColors();
@@ -323,8 +444,31 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleLogSettingsPanel();
     };
 
-    // Initialen Zustand für alle Schalter aus localStorage laden
-    updateSwitchesFromStorage();
+    // Initialisierung der Log-Filter-Einstellungen
+    const initializeLogFilters = async () => {
+        try {
+            // Versuche Log-Filter aus Firestore zu laden
+            const firestoreFilters = await loadLogFiltersFromFirestore();
+            
+            if (firestoreFilters) {
+                // Firestore-Einstellungen anwenden (Meldung wird bereits in loadLogFiltersFromFirestore ausgegeben)
+                applyLogFilterSettings(firestoreFilters);
+            } else {
+                // Fallback: nur localStorage verwenden
+                updateSwitchesFromStorage();
+                window.log?.('info', 'Log-Filter-Einstellungen aus localStorage geladen');
+            }
+        } catch (error) {
+            // Bei Fehlern: localStorage als Fallback
+            updateSwitchesFromStorage();
+            window.log?.('warn', `Log-Filter-Initialisierung fehlgeschlagen: ${error.message}`);
+        }
+        
+        toggleLogSettingsPanel();
+    };
+
+    // Initialen Zustand für alle Schalter laden
+    initializeLogFilters();
 
     // Event-Listener für alle Schalter
     settingSwitches.forEach(toggle => {
@@ -335,6 +479,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (settingKey.startsWith('log_') || settingKey === 'show_log_console' || settingKey === 'logs_enabled') {
                 localStorage.setItem(settingKey, settingValue);
                 showNotification(`Einstellung '${settingKey}' lokal gespeichert.`);
+                
+                // Log-Filter-Einstellungen auch in Firestore speichern mit Change Detection
+                const filterSettings = collectLogFilterSettings();
+                await saveIfChanged('logFilters', filterSettings, saveLogFiltersToFirestore);
                 
                 if (settingKey === 'logs_enabled') {
                     toggleLogSettingsPanel();
@@ -366,6 +514,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Initialize current settings from existing values
+    const initializeCurrentSettings = () => {
+        // Load current colors
+        const currentColors = {};
+        Object.keys(defaultColors).forEach(type => {
+            currentColors[type] = localStorage.getItem(`log_color_${type}`) || defaultColors[type];
+        });
+        currentSettings.colors = currentColors;
+        
+        // Load current log filters
+        currentSettings.logFilters = collectLogFilterSettings();
+        
+        // Load current admin settings
+        const adminSettings = {};
+        settingSwitches.forEach(toggle => {
+            const settingKey = toggle.getAttribute('data-setting');
+            adminSettings[settingKey] = localStorage.getItem(settingKey) === 'true';
+        });
+        currentSettings.adminSettings = adminSettings;
+        
+        window.log?.('info', 'Current settings initialized for change detection');
+    };
+
+    // Initialize settings on page load
+    initializeCurrentSettings();
 
     // Listener, um die Schalter zu aktualisieren, wenn die Konsole extern geändert wird
     window.addEventListener('settings-updated', updateSwitchesFromStorage);

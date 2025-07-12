@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Projekt Phoenix{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/debug_console.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
@@ -28,10 +29,10 @@
         </nav>
         <div class="user-menu">
             <div class="theme-switcher">
-                <i class="fas fa-sun theme-icon"></i>
+                <i class="fas fa-moon theme-icon"></i>
                 <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
                 <label for="theme-toggle" class="theme-toggle-label"></label>
-                <i class="fas fa-moon theme-icon"></i>
+                <i class="fas fa-sun theme-icon"></i>
             </div>
             {% if session.user_id %}
                 <span>Willkommen, {{ session.username }}! {% if session.is_admin %}<strong class="admin-label">(Admin)</strong>{% endif %}</span>
@@ -87,6 +88,7 @@
                 </div>
             </div>
             <div class="log-header-actions">
+                <button id="log-lock-btn" class="icon-btn" title="Konsole fixieren/entsperren"><i class="fas fa-lock"></i></button>
                 <button id="log-autoscroll-btn" class="icon-btn" title="Auto-Scroll"><i class="fas fa-arrow-down"></i></button>
                 <button id="log-reverse-btn" class="icon-btn" title="Reihenfolge umkehren"><i class="fas fa-exchange-alt"></i></button>
                 <button id="log-settings-btn" class="icon-btn" title="Filter"><i class="fas fa-filter"></i></button>
@@ -125,9 +127,13 @@
             debug_mode: {{ 'true' if app_settings.get('debug_mode') else 'false' }},
             test_mode: {{ 'true' if app_settings.get('test_mode') else 'false' }}
         };
+        
+        // User theme for theme switcher
+        window.USER_THEME = '{{ session.get("user_theme", "dark") }}';
     </script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script src="{{ url_for('static', filename='js/debug_console.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme_switcher.js') }}?v={{ range(1000, 9999) | random }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

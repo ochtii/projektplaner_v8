@@ -39,11 +39,11 @@ if (originalFetch) {
         // API Request Logging
         window.log('api_req', `${method} ${urlString}`);
         
-        // Firebase/Firestore spezifische Logs
+        // Firebase/Firestore spezifische Logs - jetzt als Info
         if (urlString.includes('firestore.googleapis.com')) {
-            window.log('firestore', `Firestore ${method}: ${urlString.split('/').pop()}`);
+            window.log('info', `Firestore ${method}: ${urlString.split('/').pop()}`);
         } else if (urlString.includes('firebase') || urlString.includes('googleapis.com')) {
-            window.log('database', `Firebase ${method}: ${urlString}`);
+            window.log('info', `Firebase ${method}: ${urlString}`);
         }
 
         try {
@@ -52,18 +52,18 @@ if (originalFetch) {
             // API Response Logging
             window.log('api_ans', `${response.status} ${response.statusText} - ${method} ${urlString}`);
             
-            // Firebase/Firestore Response Logging
+            // Firebase/Firestore Response Logging - jetzt als Info
             if (urlString.includes('firestore.googleapis.com')) {
                 if (response.ok) {
-                    window.log('firestore', `Firestore Response: ${response.status} - Success`);
+                    window.log('info', `Firestore Response: ${response.status} - Success`);
                 } else {
-                    window.log('firestore', `Firestore Error: ${response.status} ${response.statusText}`);
+                    window.log('info', `Firestore Error: ${response.status} ${response.statusText}`);
                 }
             } else if (urlString.includes('firebase') || urlString.includes('googleapis.com')) {
                 if (response.ok) {
-                    window.log('database', `Firebase Response: ${response.status} - Success`);
+                    window.log('info', `Firebase Response: ${response.status} - Success`);
                 } else {
-                    window.log('database', `Firebase Error: ${response.status} ${response.statusText}`);
+                    window.log('info', `Firebase Error: ${response.status} ${response.statusText}`);
                 }
             }
             
@@ -71,9 +71,9 @@ if (originalFetch) {
         } catch (error) {
             window.log('err', `Fetch Error: ${error.message} - ${method} ${urlString}`);
             
-            // Firebase/Firestore Error Logging
+            // Firebase/Firestore Error Logging - jetzt als Info
             if (urlString.includes('firestore.googleapis.com')) {
-                window.log('firestore', `Firestore Connection Error: ${error.message}`);
+                window.log('info', `Firestore Connection Error: ${error.message}`);
             } else if (urlString.includes('firebase') || urlString.includes('googleapis.com')) {
                 window.log('database', `Firebase Connection Error: ${error.message}`);
             }
@@ -298,11 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLogsFromStorage();
     });
 
-    autoscrollBtn.addEventListener('click', () => {
-        const isEnabled = localStorage.getItem('log_autoscroll_enabled') !== 'false';
-        localStorage.setItem('log_autoscroll_enabled', !isEnabled);
-        window.dispatchEvent(new CustomEvent('settings-updated'));
-    });
+    // Autoscroll wird jetzt in initializeConsoleControls() behandelt
 
     settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -460,7 +456,6 @@ document.addEventListener('DOMContentLoaded', () => {
             api_req: '#8b5cf6',
             api_ans: '#a855f7',
             database: '#10b981',
-            firestore: '#059669',
             activity: '#6b7280',
             console_background: '#282c34',
             log_text: '#abb2bf',
@@ -630,4 +625,161 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial mode warnings update
     updateModeWarnings();
+
+    // Console State Management
+    let consoleState = {
+        isLocked: true,
+        isAutoscrolling: true,
+        isResizing: false,
+        initialHeight: 0,
+        initialMouseY: 0
+    };
+
+    // Initialize Console UI Controls
+    function initializeConsoleControls() {
+        const console = document.querySelector('.log-console');
+        const lockBtn = document.getElementById('log-lock-btn');
+        const autoscrollBtn = document.getElementById('log-autoscroll-btn');
+        
+        if (!console || !lockBtn || !autoscrollBtn) {
+            console.log('Console controls not ready yet, retrying...');
+            setTimeout(initializeConsoleControls, 100);
+            return;
+        }
+        
+        const header = console.querySelector('.log-header');
+        if (!header) {
+            console.log('Console header not ready yet, retrying...');
+            setTimeout(initializeConsoleControls, 100);
+            return;
+        }
+
+        // Lock/Unlock functionality
+        lockBtn.addEventListener('click', function() {
+            consoleState.isLocked = !consoleState.isLocked;
+            updateLockState();
+        });
+
+        // Autoscroll toggle with arrow rotation
+        autoscrollBtn.addEventListener('click', function() {
+            consoleState.isAutoscrolling = !consoleState.isAutoscrolling;
+            localStorage.setItem('log_autoscroll_enabled', consoleState.isAutoscrolling);
+            updateAutoscrollState();
+            window.dispatchEvent(new CustomEvent('settings-updated'));
+        });
+
+    // Drag functionality for resizing from top edge
+    header.addEventListener('mousedown', handleResizeStart);
+    document.addEventListener('mousemove', handleResizeMove);
+    document.addEventListener('mouseup', handleResizeEnd);
+
+    // Initialize states from localStorage
+    consoleState.isAutoscrolling = localStorage.getItem('log_autoscroll_enabled') !== 'false';
+    
+    // Restore saved console height
+    const savedHeight = localStorage.getItem('log_console_height');
+    if (savedHeight && !consoleState.isLocked) {
+        const console = document.querySelector('.log-console');
+        if (console) {
+            console.style.height = savedHeight;
+            const logBody = console.querySelector('.log-body');
+            if (logBody) {
+                const headerHeight = console.querySelector('.log-header').offsetHeight;
+                logBody.style.height = (parseInt(savedHeight) - headerHeight) + 'px';
+            }
+        }
+    }
+    
+    updateLockState();
+    updateAutoscrollState();
+    }
+
+    function updateLockState() {
+        const console = document.querySelector('.log-console');
+        const lockBtn = document.getElementById('log-lock-btn');
+        const lockIcon = lockBtn.querySelector('i');
+
+        if (consoleState.isLocked) {
+            lockBtn.classList.remove('unlocked');
+            lockBtn.classList.add('locked');
+            lockIcon.className = 'fas fa-lock';
+            lockBtn.title = 'Konsole entsperren';
+            console.classList.remove('resizable');
+        } else {
+            lockBtn.classList.remove('locked');
+            lockBtn.classList.add('unlocked');
+            lockIcon.className = 'fas fa-unlock';
+            lockBtn.title = 'Konsole fixieren';
+            console.classList.add('resizable');
+        }
+    }
+
+    function updateAutoscrollState() {
+        const autoscrollBtn = document.getElementById('log-autoscroll-btn');
+        
+        if (consoleState.isAutoscrolling) {
+            autoscrollBtn.classList.add('active');
+            autoscrollBtn.title = 'Auto-Scroll deaktivieren';
+        } else {
+            autoscrollBtn.classList.remove('active');
+            autoscrollBtn.title = 'Auto-Scroll aktivieren';
+        }
+    }
+
+    function handleResizeStart(e) {
+        if (consoleState.isLocked) return;
+        
+        e.preventDefault();
+        consoleState.isResizing = true;
+        
+        const console = document.querySelector('.log-console');
+        consoleState.initialHeight = console.offsetHeight;
+        consoleState.initialMouseY = e.clientY;
+        
+        console.classList.add('resizing');
+        document.body.style.userSelect = 'none';
+        document.body.style.cursor = 'ns-resize';
+    }
+
+    function handleResizeMove(e) {
+        if (!consoleState.isResizing || consoleState.isLocked) return;
+        
+        e.preventDefault();
+        const console = document.querySelector('.log-console');
+        
+        // Calculate new height based on mouse movement
+        const deltaY = consoleState.initialMouseY - e.clientY; // Inverted because we're resizing from top
+        let newHeight = consoleState.initialHeight + deltaY;
+        
+        // Set minimum and maximum height
+        const minHeight = 200;
+        const maxHeight = window.innerHeight * 0.8;
+        
+        newHeight = Math.max(minHeight, Math.min(newHeight, maxHeight));
+        
+        console.style.height = newHeight + 'px';
+        
+        // Adjust the log body to fill the available space
+        const logBody = console.querySelector('.log-body');
+        if (logBody) {
+            const headerHeight = console.querySelector('.log-header').offsetHeight;
+            logBody.style.height = (newHeight - headerHeight) + 'px';
+        }
+    }
+
+    function handleResizeEnd() {
+        if (!consoleState.isResizing) return;
+        
+        consoleState.isResizing = false;
+        const console = document.querySelector('.log-console');
+        
+        console.classList.remove('resizing');
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        
+        // Save the new height to localStorage
+        localStorage.setItem('log_console_height', console.style.height);
+    }
+
+    initializeConsoleControls();
 });

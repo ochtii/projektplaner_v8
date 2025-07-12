@@ -1,7 +1,7 @@
 # location: app/routes/auth.py
 # Lädt benutzerspezifische Einstellungen beim Login in die Sitzung.
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app, jsonify
 from functools import wraps
 from firebase_admin import auth as firebase_auth
 from ..extensions import data_manager
@@ -86,3 +86,44 @@ def logout():
     session.clear()
     flash('Sie wurden erfolgreich abgemeldet.', 'success')
     return redirect(url_for('auth.login'))
+
+@auth_bp.route('/api/update-user-preferences', methods=['POST'])
+@login_required
+def update_user_preferences():
+    """Update user-specific settings like theme"""
+    data = request.get_json()
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User nicht angemeldet'}), 401
+    
+    setting_key = data.get('setting')
+    setting_value = data.get('value')
+    
+    if not setting_key:
+        return jsonify({'status': 'error', 'message': 'Setting key fehlt'}), 400
+    
+    try:
+        user_data = data_manager.get_user(user_id) or {}
+        if not user_data:
+            return jsonify({'status': 'error', 'message': 'User nicht gefunden'}), 404
+            
+        # Initialize user_settings if not exists
+        if 'user_settings' not in user_data or not user_data['user_settings']:
+            user_data['user_settings'] = {"theme": "dark", "language": "de", "notifications": True}
+        
+        # Update specific setting
+        user_data['user_settings'][setting_key] = setting_value
+        data_manager.save_user(user_data)
+        
+        # Update session if needed
+        if setting_key == 'theme':
+            session['user_theme'] = setting_value
+        
+        return jsonify({
+            'status': 'success', 
+            'message': f'User-Einstellung {setting_key} aktualisiert'
+        })
+        
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Fehler beim Speichern: {str(e)}'}), 500
